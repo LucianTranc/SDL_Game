@@ -12,6 +12,7 @@ public:
 	int height = 32;
 	int width = 32;
 	int scale = 1;
+	float angle = 1;
 
 	int speed = 3;
 
@@ -48,8 +49,10 @@ public:
 
 	void update() override
 	{
-		position.x += velocity.x * speed;
-		position.y += velocity.y * speed;
+		
+		position.x += (velocity.x * speed);
+		position.y += (velocity.y * speed);
+
 	}
 
 };

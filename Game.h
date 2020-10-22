@@ -3,9 +3,11 @@
 #include "SDL_image.h"
 #include <iostream>
 #include <vector>
+#include "UIStatistics.h"
 
 class ColliderComponent;
 class AssetManager;
+//class UIStatistics;
 
 class Game
 
@@ -28,12 +30,14 @@ public:
 	static bool isRunning;
 	static SDL_Rect camera;
 	static AssetManager *assets;
+	//static UIStatistics *statManager;
 	enum groupLabels : std::size_t
 	{
 		groupMap,
 		groupPlayers,
 		groupColliders,
-		groupProjectiles
+		groupProjectiles,
+		groupUILables
 	};
 private:
 	//int cnt;

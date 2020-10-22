@@ -5,7 +5,9 @@
 #include "Vector2D.h"
 #include "Collision.h"
 #include "AssetManager.h"
+#include "UIStatistics.h"
 #include <sstream>
+#include <cmath>
 
 Map* map;
 Manager manager;
@@ -17,8 +19,16 @@ SDL_Rect Game::camera = { 0, 0, 800, 640 };
 
 AssetManager* Game::assets = new AssetManager(&manager);
 
+//UIStatistics* Game::statManager = new UIStatistics(&manager);
+
 auto& player(manager.addEntity());
-auto& label(manager.addEntity());
+
+auto& positionLabel(manager.addEntity());
+auto& velocityLabel(manager.addEntity());
+auto& keysLabel(manager.addEntity());
+auto& mousePosLabel(manager.addEntity());
+auto& angleLabel(manager.addEntity());
+	
 
 bool Game::isRunning = false;
 
@@ -78,19 +88,30 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	player.addComponent<ColliderComponent>("player");
 	player.addGroup(groupPlayers);
 
-	SDL_Color white = {255, 255, 255, 255};
-	label.addComponent<UILabel>(10, 10, "Test String", "arial", white);
+	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400 + 64);
+	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320 + 64);
 
-	assets->CreateProjectile(Vector2D(600, 600), Vector2D(1 ,0), 400, 2, "projectile");
-	assets->CreateProjectile(Vector2D(600, 620), Vector2D(1, 0), 400, 2, "projectile");
-	assets->CreateProjectile(Vector2D(400, 600), Vector2D(1, 1), 400, 2, "projectile");
-	assets->CreateProjectile(Vector2D(600, 600), Vector2D(1, -1), 400, 2, "projectile");
+	//->newStat(10, 110, "testlabel");
+	
+
+	SDL_Color white = {255, 255, 255, 255};
+	positionLabel.addComponent<UILabel>(10, 10, "Test String", "arial", white);
+	velocityLabel.addComponent<UILabel>(10, 30, "Test String", "arial", white);
+	keysLabel.addComponent<UILabel>(10, 50, "Test String", "arial", white);
+	mousePosLabel.addComponent<UILabel>(10, 70, "Test String", "arial", white);
+	angleLabel.addComponent<UILabel>(10, 90, "Test String", "arial", white);
+
+	//assets->CreateProjectile(Vector2D(600, 600), Vector2D(1 ,0), 400, 2, "projectile");
+	assets->CreateProjectile(Vector2D(1000, 600), Vector2D(sin(1.4), cos(1.4)), 400, 2, "projectile");
+	//assets->CreateProjectile(Vector2D(400, 600), Vector2D(1, 1), 400, 2, "projectile");
+	//assets->CreateProjectile(Vector2D(600, 400), Vector2D(1, -1), 400, 2, "projectile");
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
 auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
 auto& projectiles(manager.getGroup(Game::groupProjectiles));
+auto& uilabels(manager.getGroup(Game::groupUILables));
 
 void Game::handleEvents() {
 
@@ -102,6 +123,7 @@ void Game::handleEvents() {
 	default:
 		break;
 	}
+	
 
 }
 
@@ -109,10 +131,35 @@ void Game::update() {
 
 	SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
 	Vector2D playerPos = player.getComponent<TransformComponent>().position;
+	Vector2D playerVel = player.getComponent<TransformComponent>().velocity;
+	bool up = player.getComponent<KeyboardController>().up;
+	bool left = player.getComponent<KeyboardController>().left;
+	bool down = player.getComponent<KeyboardController>().down;
+	bool right = player.getComponent<KeyboardController>().right;
+	int mousex = player.getComponent<KeyboardController>().mousex;
+	int mousey = player.getComponent<KeyboardController>().mousey;
+	double mouseangle = std::atan2(camera.x + mousex - playerPos.x - 64, camera.y + mousey - playerPos.y - 64);
 
-	std::stringstream ss;
-	ss << "Player position: " << playerPos;
-	label.getComponent<UILabel>().SetLabelText(ss.str(), "arial");
+
+	std::stringstream pos;
+	std::stringstream vel;
+	std::stringstream keys;
+	std::stringstream mousepos;
+	std::stringstream angle;
+	pos << "Player position: " << playerPos << ", Camera position: (" << camera.x << ", " << camera.y << ")";
+	positionLabel.getComponent<UILabel>().SetLabelText(pos.str(), "arial");
+	vel << "Player velocity: " << playerVel;
+	velocityLabel.getComponent<UILabel>().SetLabelText(vel.str(), "arial");
+	keys << "up: " <<  up << ", left: " << left << ", down: " << down << ", right: "<< right; 
+	keysLabel.getComponent<UILabel>().SetLabelText(keys.str(), "arial");
+	mousepos << "mouse position: (" << mousex << ", " << mousey << ")";
+	mousePosLabel.getComponent<UILabel>().SetLabelText(mousepos.str(), "arial");
+	angle << "mouse direction angle: " << mouseangle;
+	angleLabel.getComponent<UILabel>().SetLabelText(angle.str(), "arial");
+
+
+	//statManager->updateStat("testlabel", "testlabel", "testdata");
+
 
 	manager.refresh();
 	manager.update();
@@ -126,17 +173,17 @@ void Game::update() {
 		}
 	}
 
-	for (auto& p : projectiles)
+	/*for (auto& p : projectiles)
 	{
 		if (Collision::AABB(player.getComponent<ColliderComponent>().collider, p->getComponent<ColliderComponent>().collider))
 		{
 			std::cout << "Hit player\n";
 			p->destory();
 		}
-	}
+	}*/
 
-	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400);
-	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320);
+	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400 + 64);
+	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320 + 64);
 
 	if (camera.x < 0)
 		camera.x = 0;
@@ -174,9 +221,20 @@ void Game::render()
 		//std::cout << "destR: x = " << destRect.x << ", y = " << destRect.y << ", w = " << destRect.w << ", h = " << destRect.h << std::endl;
 	}
 
+	for (auto& u : uilabels)
+	{
+		u->draw();
+	}
+
 	
 
-	label.draw();
+	positionLabel.draw();
+	velocityLabel.draw();
+	keysLabel.draw();
+	mousePosLabel.draw();
+	angleLabel.draw();
+
+
 
 	SDL_RenderPresent(renderer);
 }

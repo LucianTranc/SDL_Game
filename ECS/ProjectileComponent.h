@@ -16,6 +16,7 @@ public:
 	{
 		transform = &entity->getComponent<TransformComponent>();
 		transform->velocity = velocity;
+		//std::cout<< "velocity: " << velocity << std::endl;
 	}
 
 	void update() override
@@ -28,7 +29,7 @@ public:
 
 		if (distance > range)
 		{
-			std::cout << "Out of range\n";
+			//std::cout << "Out of range\n";
 			entity->destory();
 		}
 		else if (transform->position.x > Game::camera.x + Game::camera.w ||
@@ -36,7 +37,9 @@ public:
 			transform->position.y > Game::camera.y + Game::camera.h ||
 			transform->position.y < Game::camera.y)
 		{
-			std::cout << "Out of bounds\n";
+			//std::cout << "Game camera: {" << Game::camera.x << ", " << Game::camera.y << ", " <<  Game::camera.w << ", " << Game::camera.h << "}\n";
+			//std::cout << "Projectile Position: (" << transform->position.x << ", " << transform->position.y << ")\n";
+			//std::cout << "Out of bounds\n";
 			entity->destory();
 		}
 
