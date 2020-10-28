@@ -15,7 +15,7 @@ Manager manager;
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 
-SDL_Rect Game::camera = { 0, 0, 800, 640 };
+SDL_Rect Game::camera = { 0, 0, 800*2, 640*2 };
 
 AssetManager* Game::assets = new AssetManager(&manager);
 
@@ -72,9 +72,9 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 		std::cout << "Error : SDL_TTF" << std::endl;
 	}
 
-	assets->AddTexture("terrain", "assets/terrain_ss.png", renderer);
-	assets->AddTexture("player", "assets/player_anims.png", renderer);
-	assets->AddTexture("projectile", "assets/proj.png", renderer);
+	assets->AddTexture("terrain", "assets/ground_ss.png", renderer);
+	assets->AddTexture("player", "assets/boy_anims.png", renderer);
+	assets->AddTexture("projectile", "assets/projectile.png", renderer);
 
 	assets->AddFont("arial", "assets/arial.ttf", 16);
 
@@ -94,7 +94,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	//->newStat(10, 110, "testlabel");
 	
 
-	SDL_Color white = {255, 255, 255, 255};
+	SDL_Color white = {0, 0, 0, 0};
 	positionLabel.addComponent<UILabel>(10, 10, "Test String", "arial", white);
 	velocityLabel.addComponent<UILabel>(10, 30, "Test String", "arial", white);
 	keysLabel.addComponent<UILabel>(10, 50, "Test String", "arial", white);
