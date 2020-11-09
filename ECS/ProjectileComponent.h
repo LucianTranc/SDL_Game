@@ -16,6 +16,7 @@ public:
 	{
 		transform = &entity->getComponent<TransformComponent>();
 		transform->velocity = velocity;
+		transform->speed = speed;
 		//std::cout<< "velocity: " << velocity << std::endl;
 	}
 
@@ -25,7 +26,7 @@ public:
 		//std::cout << "x pos: " << transform->position.x << "\n";
 		//std::cout << "y pos: " << transform->position.y << "\n";
 
-		distance += speed;
+		distance += 1;
 
 		if (distance > range)
 		{

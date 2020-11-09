@@ -42,6 +42,8 @@ public:
 		srcR = { 0, 0, 32, 32 };
 		destR = { collider.x, collider.y, collider.w, collider.h };
 
+		update();
+
 
 	}
 

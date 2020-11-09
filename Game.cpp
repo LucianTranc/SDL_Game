@@ -5,7 +5,6 @@
 #include "Vector2D.h"
 #include "Collision.h"
 #include "AssetManager.h"
-#include "UIStatistics.h"
 #include <sstream>
 #include <cmath>
 
@@ -18,8 +17,6 @@ SDL_Event Game::event;
 SDL_Rect Game::camera = { 0, 0, 800*2, 640*2 };
 
 AssetManager* Game::assets = new AssetManager(&manager);
-
-//UIStatistics* Game::statManager = new UIStatistics(&manager);
 
 auto& player(manager.addEntity());
 
@@ -72,26 +69,13 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 		std::cout << "Error : SDL_TTF" << std::endl;
 	}
 
-	assets->AddTexture("terrain", "assets/ground_ss.png", renderer);
-	assets->AddTexture("player", "assets/boy_anims.png", renderer);
-	assets->AddTexture("projectile", "assets/projectile.png", renderer);
+	loadAssets();
+	
+	loadMap();
+	
+	createPlayer();
 
-	assets->AddFont("arial", "assets/arial.ttf", 16);
-
-	map = new Map("terrain", 3, 32);
-
-	map->LoadMap("assets/map.map", 25, 20);
-
-	player.addComponent<TransformComponent>(800.0f, 640.0f, 32, 32, 4);
-	player.addComponent<SpriteComponent>("player", true);
-	player.addComponent<KeyboardController>();
-	player.addComponent<ColliderComponent>("player");
-	player.addGroup(groupPlayers);
-
-	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400 + 64);
-	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320 + 64);
-
-	//->newStat(10, 110, "testlabel");
+	setCamera();
 	
 
 	SDL_Color white = {0, 0, 0, 0};
@@ -101,10 +85,38 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	mousePosLabel.addComponent<UILabel>(10, 70, "Test String", "arial", white);
 	angleLabel.addComponent<UILabel>(10, 90, "Test String", "arial", white);
 
-	//assets->CreateProjectile(Vector2D(600, 600), Vector2D(1 ,0), 400, 2, "projectile");
-	assets->CreateProjectile(Vector2D(1000, 600), Vector2D(sin(1.4), cos(1.4)), 400, 2, "projectile");
-	//assets->CreateProjectile(Vector2D(400, 600), Vector2D(1, 1), 400, 2, "projectile");
-	//assets->CreateProjectile(Vector2D(600, 400), Vector2D(1, -1), 400, 2, "projectile");
+}
+
+void Game::loadAssets()
+{
+
+	assets->AddTexture("terrain", "assets/ground_ss.png", renderer);
+	assets->AddTexture("player", "assets/boy_anims.png", renderer);
+	assets->AddTexture("projectile", "assets/projectile2.png", renderer);
+	assets->AddFont("arial", "assets/arial.ttf", 16);
+
+}
+
+void Game::loadMap()
+{
+	map = new Map("terrain", 3, 32);
+	map->LoadMap("assets/map.map", 25, 20);
+}
+
+void Game::createPlayer()
+{
+	player.addComponent<TransformComponent>(800.0f, 640.0f, 32, 32, 2);
+	player.addComponent<SpriteComponent>("player", true);
+	player.addComponent<KeyboardController>();
+	player.addComponent<ColliderComponent>("player");
+	player.addGroup(groupPlayers);
+	player.getComponent<TransformComponent>().speed = 6;
+}
+
+void Game::setCamera()
+{
+	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400);
+	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320);
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -158,32 +170,49 @@ void Game::update() {
 	angleLabel.getComponent<UILabel>().SetLabelText(angle.str(), "arial");
 
 
-	//statManager->updateStat("testlabel", "testlabel", "testdata");
-
 
 	manager.refresh();
+	manager.priorityUpdate();
 	manager.update();
+
+	playerCol = player.getComponent<ColliderComponent>().collider;
 
 	for (auto& c : colliders)
 	{
 		SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
 		if (Collision::AABB(cCol, playerCol))
 		{
-			player.getComponent<TransformComponent>().position = playerPos;
+			TransformComponent* playerTransform = &player.getComponent<TransformComponent>();
+			//std::cout << "Wall Collider: " << cCol.x << ", " << cCol.y << ", " << cCol.w << ", " << cCol.h << "\n";
+			//std::cout << "Play Collider: " << playerColNewFrame.x << ", " << playerColNewFrame.y << ", " << playerColNewFrame.w << ", " << playerColNewFrame.h << "\n";
+			//std::cout << "Hit Wall\n";
+			playerTransform->position = playerPos;
+
 		}
 	}
 
-	/*for (auto& p : projectiles)
+	for (auto& c : colliders)
 	{
-		if (Collision::AABB(player.getComponent<ColliderComponent>().collider, p->getComponent<ColliderComponent>().collider))
-		{
-			std::cout << "Hit player\n";
-			p->destory();
-		}
-	}*/
+		auto& tempc = c->getComponent<ColliderComponent>().collider;
 
-	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400 + 64);
-	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320 + 64);
+		for (auto& p : projectiles)
+		{
+
+			auto& tempp = p->getComponent<ColliderComponent>().collider;
+
+			if (Collision::AABB(tempc, tempp))
+			{
+				//std::cout << "Wall Collider: " << tempc.x << ", " << tempc.y << ", " << tempc.w << ", " << tempc.h << "\n";
+				//std::cout << "Proj Collider: " << tempp.x << ", " << tempp.y << ", " << tempp.w << ", " << tempp.h << "\n";
+				//std::cout << "Hit Wall\n";
+				p->destory();
+			}
+		}
+		
+	}
+
+	camera.x = static_cast<int>(player.getComponent<TransformComponent>().position.x - 400 + 32);
+	camera.y = static_cast<int>(player.getComponent<TransformComponent>().position.y - 320 + 32);
 
 	if (camera.x < 0)
 		camera.x = 0;

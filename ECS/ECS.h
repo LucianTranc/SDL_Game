@@ -41,6 +41,7 @@ public:
 	Entity* entity;
 
 	virtual void init() {}
+	virtual void priorityUpdate() {}
 	virtual void update() {}
 	virtual void draw() {}
 
@@ -61,6 +62,10 @@ private:
 public: 
 
 	Entity(Manager& mManager) : manager(mManager) {}
+
+	void priorityUpdate() {
+		for (auto& c : components) c->priorityUpdate();
+	}
 
 	void update() {
 		for (auto& c : components) c->update();
@@ -98,6 +103,7 @@ public:
 		components.emplace_back(std::move(uPtr));
 		componentArray[getComponentTypeID<T>()] = c;
 		componentBitset[getComponentTypeID<T>()] = true;
+		
 
 		c->init();
 		return *c;
@@ -119,6 +125,11 @@ private:
 	std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 
 public:
+
+	void priorityUpdate() {
+		for (auto& e: entities) e->priorityUpdate();
+	}
+
 	void update() {
 		for (auto& e : entities) e->update();
 	}

@@ -3,7 +3,6 @@
 #include "SDL_image.h"
 #include <iostream>
 #include <vector>
-#include "UIStatistics.h"
 
 class ColliderComponent;
 class AssetManager;
@@ -19,6 +18,10 @@ public:
 
 	void init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
 	
+	void loadAssets();
+	void loadMap();
+	void createPlayer();
+	void setCamera();
 	void handleEvents();
 	void update();
 	bool running() { return isRunning; }

@@ -22,7 +22,7 @@ public:
 		sprite = &entity->getComponent<SpriteComponent>();
 	}
 
-	void update() override
+	void priorityUpdate() override
 	{
 		if (Game::event.type == SDL_KEYDOWN && Game::event.key.repeat == 0)
 		{
@@ -97,8 +97,8 @@ public:
 
 			if (mousedown)
 			{
-				float mouseangle = std::atan2(Game::camera.x + mousex - transform->position.x - 64, Game::camera.y + mousey - transform->position.y - 64);
-				Game::assets->CreateProjectile(Vector2D(transform->position.x + 50, transform->position.y + 64), Vector2D(sin(mouseangle), cos(mouseangle)), 400, 2, "projectile");
+				float mouseangle = std::atan2(Game::camera.x + mousex - transform->position.x - 32, Game::camera.y + mousey - transform->position.y - 32);
+				Game::assets->CreateProjectile(Vector2D(transform->position.x + 24, transform->position.y + 24), Vector2D(sin(mouseangle), cos(mouseangle)), 400, 20, "projectile");
 			}
 
 		}

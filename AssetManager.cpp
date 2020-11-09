@@ -14,7 +14,7 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
 	//std::cout << "Created Projectile with pos: " << pos << ", vel: " << vel << ", range: " << range << ", speed: " << speed << "\n";
 
 	auto& projectile(manager->addEntity());
-	projectile.addComponent<TransformComponent>(pos.x, pos.y, 32, 32, 1);
+	projectile.addComponent<TransformComponent>(pos.x, pos.y, 16, 16, 1);
 	projectile.addComponent<SpriteComponent>(id);
 	projectile.addComponent<ProjectileComponent>(range, speed, vel);
 	projectile.addComponent<ColliderComponent>("projectile");
