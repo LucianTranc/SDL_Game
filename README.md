@@ -6,3 +6,8 @@ Some of the code from this project was inspired by this youtube tutorial: https:
 # What I learned
 * refined some OOP concepts
 * Low level techniques used in game development
+
+# How to run
+You may have noticed that I included the entire SDL2 library in this repository to make it easier
+* make trancengine
+* ./play
